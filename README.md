@@ -235,7 +235,7 @@ song-to-video/
 
 ## License
 
-**Source Available License** - This software may be used without modification and with proper attribution. See [LICENSE](LICENSE) for full terms.
+**Source Available License (Non-Commercial)** - This software is free for personal, non-commercial use only. No modifications permitted. Attribution required. See [LICENSE](LICENSE) for full terms.
 
 **Attribution:** "Song-to-Video by Ian Bergman" with link to https://github.com/ianbnet/song-to-video
 

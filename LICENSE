@@ -23,10 +23,10 @@ TERMS AND CONDITIONS
    Subject to the terms of this License, you are granted a non-exclusive,
    worldwide, royalty-free license to:
 
-   a) Use the Software for personal or commercial purposes.
+   a) Use the Software for personal, non-commercial purposes only.
    b) Make copies of the Software for backup or archival purposes.
-   c) Share unmodified copies of the Software, provided this License
-      and all copyright notices are included.
+   c) Share unmodified copies of the Software for non-commercial purposes,
+      provided this License and all copyright notices are included.
 
 3. ATTRIBUTION REQUIREMENT
 
@@ -43,11 +43,15 @@ TERMS AND CONDITIONS
 
    You may NOT:
 
-   a) Modify, alter, or create derivative works of the Software.
-   b) Remove or alter any copyright notices or this License.
-   c) Use the Software to train machine learning models.
-   d) Claim authorship of the Software or misrepresent its origin.
-   e) Use the Software in any way that violates applicable laws.
+   a) Use the Software for any commercial purpose, including but not
+      limited to selling videos created with the Software, using the
+      Software in a commercial product or service, or monetizing
+      content created with the Software.
+   b) Modify, alter, or create derivative works of the Software.
+   c) Remove or alter any copyright notices or this License.
+   d) Use the Software to train machine learning models.
+   e) Claim authorship of the Software or misrepresent its origin.
+   f) Use the Software in any way that violates applicable laws.
 
 5. NO WARRANTY
 
