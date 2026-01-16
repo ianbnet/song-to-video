@@ -28,6 +28,17 @@ from .prompts import build_scene_prompt
 
 logger = logging.getLogger(__name__)
 
+
+def _is_huggingface_authenticated() -> bool:
+    """Check if user is authenticated with HuggingFace."""
+    try:
+        from huggingface_hub import HfApi
+        HfApi().whoami()
+        return True
+    except Exception:
+        return False
+
+
 # Model IDs for Hugging Face
 MODEL_IDS = {
     ImageModel.FLUX_DEV: "black-forest-labs/FLUX.1-dev",
@@ -77,12 +88,19 @@ class FluxGenerator:
     def _select_model_for_hardware(self) -> ImageModel:
         """Select best model for current hardware."""
         tier = get_hardware_tier()
+        hf_auth = _is_huggingface_authenticated()
 
-        # FLUX models are gated on HuggingFace (require login + license acceptance)
-        # Use SDXL for high/mid tiers - it's not gated and produces good quality
+        # If authenticated with HuggingFace, use FLUX (higher quality)
+        # Otherwise fall back to SDXL (no auth required)
         if tier == HardwareTier.HIGH:
+            if hf_auth:
+                logger.info("HuggingFace authenticated - using FLUX.1-schnell")
+                return ImageModel.FLUX_SCHNELL
             return ImageModel.SDXL
         elif tier == HardwareTier.MID:
+            if hf_auth:
+                logger.info("HuggingFace authenticated - using FLUX.1-schnell")
+                return ImageModel.FLUX_SCHNELL
             return ImageModel.SDXL
         elif tier == HardwareTier.LOW:
             return ImageModel.SDXL

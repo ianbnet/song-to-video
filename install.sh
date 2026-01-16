@@ -7,6 +7,7 @@
 #   ./install.sh                       # Interactive installation
 #   INSTALL_OLLAMA=auto ./install.sh   # Auto-install Ollama without prompting
 #   INSTALL_OLLAMA=skip ./install.sh   # Skip Ollama installation
+#   HF_LOGIN=skip ./install.sh         # Skip HuggingFace login prompt
 #
 set -euo pipefail
 
@@ -394,15 +395,15 @@ install_packages() {
     log_info "This may take several minutes..."
     echo ""
 
-    # Install PyTorch with appropriate backend
+    # Install PyTorch nightly (supports latest GPUs like RTX 5090/Blackwell)
     if [[ "$GPU_AVAILABLE" == "true" ]]; then
-        log_info "Installing PyTorch with CUDA support..."
-        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 -q
+        log_info "Installing PyTorch nightly with CUDA support..."
+        pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu126 -q
     else
         log_info "Installing PyTorch (CPU only)..."
-        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu -q
+        pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu -q
     fi
-    log_ok "PyTorch installed"
+    log_ok "PyTorch nightly installed"
 
     # Install song-to-video
     if [[ "${EDITABLE_INSTALL:-true}" == "true" ]]; then
@@ -412,6 +413,51 @@ install_packages() {
         pip install ".[dev]" -q
     fi
     log_ok "song-to-video installed"
+}
+
+#───────────────────────────────────────────────────────────────────────────────
+# HuggingFace Login (optional, enables FLUX models)
+#───────────────────────────────────────────────────────────────────────────────
+
+setup_huggingface() {
+    log_step "HuggingFace Setup (Optional)"
+
+    # Check if already logged in
+    if python -c "from huggingface_hub import HfApi; HfApi().whoami()" &>/dev/null 2>&1; then
+        local hf_user
+        hf_user=$(python -c "from huggingface_hub import HfApi; print(HfApi().whoami()['name'])" 2>/dev/null || echo "unknown")
+        log_ok "Already logged in as: $hf_user"
+        log_info "FLUX models (higher quality) are available"
+        return 0
+    fi
+
+    log_info "HuggingFace login enables access to FLUX models (higher quality)"
+    log_info "Without login, SDXL will be used (still good quality)"
+
+    case "${HF_LOGIN:-prompt}" in
+        skip)
+            log_info "Skipping HuggingFace login (HF_LOGIN=skip)"
+            return 0
+            ;;
+        prompt)
+            echo ""
+            read -p "Login to HuggingFace? [y/N] " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo ""
+                log_info "Get your token at: https://huggingface.co/settings/tokens"
+                log_info "After login, accept FLUX license at: https://huggingface.co/black-forest-labs/FLUX.1-schnell"
+                echo ""
+                if huggingface-cli login; then
+                    log_ok "HuggingFace login successful"
+                else
+                    log_warn "Login failed - SDXL will be used as default"
+                fi
+            else
+                log_info "Skipping HuggingFace login (SDXL will be used)"
+            fi
+            ;;
+    esac
 }
 
 #───────────────────────────────────────────────────────────────────────────────
@@ -499,6 +545,7 @@ main() {
     check_ollama
     setup_venv
     install_packages
+    setup_huggingface
     verify_installation
     print_summary
 }

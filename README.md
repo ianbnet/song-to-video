@@ -53,6 +53,7 @@ The installer supports environment variables for customization:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `INSTALL_OLLAMA` | `prompt` | `auto`, `prompt`, or `skip` |
+| `HF_LOGIN` | `prompt` | `prompt` or `skip` - HuggingFace login for FLUX models |
 | `EDITABLE_INSTALL` | `true` | Use editable pip install for development |
 | `SKIP_SYSTEM_DEPS` | `false` | Skip apt package installation |
 
@@ -136,7 +137,8 @@ Models download automatically on first use to `~/.cache/huggingface/`:
 | Model | Size | Purpose |
 |-------|------|---------|
 | Whisper | 0.5-3GB | Audio transcription |
-| SDXL | 6-8GB | Reference image generation |
+| SDXL | 6-8GB | Reference image generation (default) |
+| FLUX.1-schnell | 12-15GB | Reference images (requires HuggingFace login) |
 | LTX-Video | 15-20GB | Video clip generation |
 | Llama 3.1 8B | ~5GB | Scene planning (via Ollama) |
 
