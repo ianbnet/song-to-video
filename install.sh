@@ -421,20 +421,28 @@ install_packages() {
 verify_installation() {
     log_step "Verifying Installation"
 
-    if ! command -v song-to-video &>/dev/null; then
-        log_error "song-to-video command not found"
-        log_info "Try: source .venv/bin/activate"
+    # Ensure venv bin is in PATH
+    export PATH="$SCRIPT_DIR/$VENV_DIR/bin:$PATH"
+    hash -r 2>/dev/null || true
+
+    # Try the command directly, or via the venv bin path
+    local song_cmd="$SCRIPT_DIR/$VENV_DIR/bin/song-to-video"
+
+    if [[ ! -x "$song_cmd" ]]; then
+        log_error "song-to-video not found in venv"
+        log_info "Installation may have failed. Try:"
+        log_info "  source .venv/bin/activate && pip install -e ."
         return 1
     fi
 
     local version
-    version=$(song-to-video version 2>&1 || echo "unknown")
+    version=$("$song_cmd" version 2>&1 || echo "unknown")
     log_ok "$version"
 
     # Run verification script if available
     if [[ -f "$SCRIPT_DIR/scripts/verify_install.py" ]]; then
         echo ""
-        python3 "$SCRIPT_DIR/scripts/verify_install.py"
+        "$SCRIPT_DIR/$VENV_DIR/bin/python" "$SCRIPT_DIR/scripts/verify_install.py"
     fi
 }
 
