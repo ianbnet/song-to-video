@@ -21,7 +21,7 @@ dependencies = [
     "faster-whisper>=1.0.0",
     "mutagen>=1.47",
     "pydub>=0.25",
-    "audioop-lts>=0.2",  # Python 3.13 compatibility
+    "audioop-lts>=0.2; python_version >= '3.13'",  # Only needed for Python 3.13+
     # Audio analysis
     "librosa>=0.10",
     # Image generation
