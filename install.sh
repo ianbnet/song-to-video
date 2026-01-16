@@ -116,10 +116,12 @@ install_system_deps() {
 
     # Check for Python 3.11+
     local python_ok=false
+    local python_version=""
     for cmd in python3.13 python3.12 python3.11 python3; do
         if command -v "$cmd" &>/dev/null; then
             if $cmd -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)" 2>/dev/null; then
                 PYTHON_CMD="$cmd"
+                python_version=$($cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
                 python_ok=true
                 break
             fi
@@ -130,13 +132,13 @@ install_system_deps() {
         log_warn "Python 3.11+ not found"
         packages_to_install+=("python3.11" "python3.11-venv")
         PYTHON_CMD="python3.11"
-    fi
-
-    # Check for python3-venv
-    if ! $PYTHON_CMD -c "import venv" &>/dev/null 2>&1; then
-        local python_version
-        python_version=$($PYTHON_CMD -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || echo "3")
-        packages_to_install+=("python${python_version}-venv")
+        python_version="3.11"
+    else
+        # Python found, check if venv module is available
+        if ! $PYTHON_CMD -c "import venv" &>/dev/null 2>&1; then
+            log_info "Python venv module not found, will install python${python_version}-venv"
+            packages_to_install+=("python${python_version}-venv")
+        fi
     fi
 
     # Install missing packages
