@@ -10,8 +10,15 @@ from ..memory import (
     detect_gpu,
     HardwareTier,
 )
-from ..downloads import get_model_manager, WHISPER_MODEL_BY_TIER
 from .models import Lyrics, LyricLine, Word, LyricsSource, TranscriptionError
+
+# Whisper model selection by hardware tier
+WHISPER_MODEL_BY_TIER = {
+    "high": "large-v3",
+    "mid": "medium",
+    "low": "small",
+    "cpu": "small",
+}
 
 logger = logging.getLogger(__name__)
 
