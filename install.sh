@@ -231,20 +231,26 @@ check_ollama() {
         ollama_version=$(ollama --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
         log_ok "Ollama $ollama_version installed"
 
-        if curl -s --connect-timeout 2 http://localhost:11434/api/version &>/dev/null; then
+        # Start service if not running
+        if ! curl -s --connect-timeout 2 http://localhost:11434/api/version &>/dev/null; then
+            start_ollama_service
+        else
             OLLAMA_RUNNING=true
             log_ok "Ollama server is running"
+        fi
 
+        # Check/pull model
+        if [[ "$OLLAMA_RUNNING" == "true" ]]; then
             local models
             models=$(ollama list 2>/dev/null | tail -n +2 | awk '{print $1}' | head -5 | tr '\n' ' ' || true)
             if [[ -n "$models" ]]; then
                 log_info "Available models: $models"
-            else
-                log_warn "No models installed - run: ollama pull llama3.1:8b"
             fi
-        else
-            log_warn "Ollama is not running"
-            log_info "Start it with: ollama serve"
+
+            # Ensure we have the default model
+            if ! ollama list 2>/dev/null | grep -q "llama3.1:8b"; then
+                pull_ollama_model
+            fi
         fi
         return 0
     fi
@@ -279,15 +285,72 @@ install_ollama() {
     if curl -fsSL https://ollama.com/install.sh | sh; then
         OLLAMA_INSTALLED=true
         log_ok "Ollama installed successfully"
-        echo ""
-        log_info "To complete Ollama setup:"
-        log_info "  1. Open a new terminal"
-        log_info "  2. Run: ollama serve"
-        log_info "  3. Run: ollama pull llama3.1:8b"
+
+        # Start Ollama service
+        start_ollama_service
+
+        # Pull the default model
+        pull_ollama_model
     else
         log_error "Ollama installation failed"
         log_info "Try installing manually:"
         log_info "  curl -fsSL https://ollama.com/install.sh | sh"
+        return 1
+    fi
+}
+
+start_ollama_service() {
+    log_info "Starting Ollama service..."
+
+    # Check if already running
+    if curl -s --connect-timeout 2 http://localhost:11434/api/version &>/dev/null; then
+        OLLAMA_RUNNING=true
+        log_ok "Ollama is already running"
+        return 0
+    fi
+
+    # Try systemd first (Ollama installs as a service)
+    if command -v systemctl &>/dev/null && systemctl is-enabled ollama &>/dev/null 2>&1; then
+        sudo systemctl start ollama
+        sleep 2
+    else
+        # Start in background manually
+        log_info "Starting Ollama in background..."
+        nohup ollama serve > /dev/null 2>&1 &
+        sleep 3
+    fi
+
+    # Verify it started
+    if curl -s --connect-timeout 5 http://localhost:11434/api/version &>/dev/null; then
+        OLLAMA_RUNNING=true
+        log_ok "Ollama service started"
+    else
+        log_warn "Could not start Ollama automatically"
+        log_info "Start manually with: ollama serve"
+    fi
+}
+
+pull_ollama_model() {
+    if [[ "$OLLAMA_RUNNING" != "true" ]]; then
+        log_warn "Ollama not running, skipping model download"
+        log_info "Run later: ollama pull llama3.1:8b"
+        return 1
+    fi
+
+    # Check if model already exists
+    if ollama list 2>/dev/null | grep -q "llama3.1:8b"; then
+        log_ok "Model llama3.1:8b already installed"
+        return 0
+    fi
+
+    log_info "Downloading LLM model (llama3.1:8b)..."
+    log_info "This may take a few minutes..."
+
+    if ollama pull llama3.1:8b; then
+        log_ok "Model llama3.1:8b installed"
+    else
+        log_warn "Model download failed"
+        log_info "Run later: ollama pull llama3.1:8b"
         return 1
     fi
 }
@@ -390,26 +453,23 @@ print_summary() {
     echo "  1. Activate the environment:"
     echo -e "     ${DIM}source .venv/bin/activate${NC}"
     echo ""
-
-    if [[ "$OLLAMA_RUNNING" != "true" ]]; then
-        echo "  2. Start Ollama (in a separate terminal):"
-        echo -e "     ${DIM}ollama serve${NC}"
-        echo ""
-        if [[ "$OLLAMA_INSTALLED" == "true" ]]; then
-            echo "  3. Pull the LLM model (one time):"
-        else
-            echo "  3. Install Ollama and pull a model:"
-            echo -e "     ${DIM}curl -fsSL https://ollama.com/install.sh | sh${NC}"
-        fi
-        echo -e "     ${DIM}ollama pull llama3.1:8b${NC}"
-        echo ""
-        echo "  4. Generate a video:"
-    else
-        echo "  2. Generate a video:"
-    fi
+    echo "  2. Generate a video:"
     echo -e "     ${DIM}song-to-video generate song.mp3 -o video.mp4${NC}"
     echo ""
-    echo -e "${YELLOW}Note:${NC} AI models (~30-50GB) download automatically on first run."
+
+    if [[ "$OLLAMA_RUNNING" != "true" ]]; then
+        echo -e "${YELLOW}Note:${NC} Ollama needs to be running before generating videos."
+        echo -e "      Start it with: ${DIM}ollama serve${NC}"
+        echo ""
+    fi
+
+    if ! ollama list 2>/dev/null | grep -q "llama3.1:8b"; then
+        echo -e "${YELLOW}Note:${NC} LLM model not yet installed."
+        echo -e "      Run: ${DIM}ollama pull llama3.1:8b${NC}"
+        echo ""
+    fi
+
+    echo -e "${DIM}AI models (~30-50GB) download automatically on first run.${NC}"
     echo ""
 }
 
