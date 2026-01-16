@@ -1,0 +1,57 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "song-to-video"
+version = "0.1.0"
+description = "Transform songs into AI-generated music videos"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Ian Bergman" }
+]
+dependencies = [
+    "torch>=2.0",
+    "nvidia-ml-py>=12.0",  # Official NVIDIA package (provides pynvml module)
+    "psutil>=5.9",
+    "typer>=0.9",
+    "rich>=13.0",
+    # Audio processing
+    "faster-whisper>=1.0.0",
+    "mutagen>=1.47",
+    "pydub>=0.25",
+    "audioop-lts>=0.2",  # Python 3.13 compatibility
+    # Audio analysis
+    "librosa>=0.10",
+    # Image generation
+    "diffusers>=0.30",
+    "transformers>=4.40",
+    "accelerate>=0.30",
+    "safetensors>=0.4",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+]
+
+[project.scripts]
+song-to-video = "song_to_video.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/song_to_video"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: marks tests as integration tests (require external dependencies)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
