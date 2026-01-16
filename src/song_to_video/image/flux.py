@@ -78,8 +78,10 @@ class FluxGenerator:
         """Select best model for current hardware."""
         tier = get_hardware_tier()
 
+        # Use FLUX_SCHNELL for high/mid tiers (not gated, no HuggingFace login required)
+        # FLUX_DEV requires accepting license and authentication
         if tier == HardwareTier.HIGH:
-            return ImageModel.FLUX_DEV
+            return ImageModel.FLUX_SCHNELL
         elif tier == HardwareTier.MID:
             return ImageModel.FLUX_SCHNELL
         elif tier == HardwareTier.LOW:
