@@ -188,6 +188,19 @@ check_ollama() {
 
 install_ollama() {
     log_info "Installing Ollama..."
+
+    # Check for zstd (required for Ollama extraction)
+    if ! command -v zstd &>/dev/null; then
+        log_info "Installing zstd (required for Ollama)..."
+        if ! sudo apt-get install -y zstd; then
+            log_error "Failed to install zstd"
+            log_info "Install manually: sudo apt install zstd"
+            return 1
+        fi
+        log_ok "zstd installed"
+    fi
+
+    # Install Ollama
     if curl -fsSL https://ollama.com/install.sh | sh; then
         OLLAMA_INSTALLED=true
         log_ok "Ollama installed"
@@ -195,6 +208,8 @@ install_ollama() {
         log_info "Then pull a model: ollama pull llama3.1:8b"
     else
         log_error "Ollama installation failed"
+        log_info "Try installing manually: curl -fsSL https://ollama.com/install.sh | sh"
+        return 1
     fi
 }
 
