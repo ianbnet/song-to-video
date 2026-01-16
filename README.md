@@ -136,7 +136,7 @@ Models download automatically on first use to `~/.cache/huggingface/`:
 | Model | Size | Purpose |
 |-------|------|---------|
 | Whisper | 0.5-3GB | Audio transcription |
-| Flux Schnell / SDXL | 10-15GB | Reference image generation |
+| SDXL | 6-8GB | Reference image generation |
 | LTX-Video | 15-20GB | Video clip generation |
 | Llama 3.1 8B | ~5GB | Scene planning (via Ollama) |
 
