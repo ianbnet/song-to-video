@@ -1098,7 +1098,7 @@ def generate(
     output: str = typer.Option("output.mp4", "--output", "-o", help="Output video path"),
     lyrics: Optional[str] = typer.Option(None, "--lyrics", "-l", help="Manual lyrics file"),
     seed: Optional[int] = typer.Option(None, "--seed", "-s", help="Master visual seed"),
-    quality: str = typer.Option("standard", "--quality", "-q", help="Quality preset"),
+    quality: str = typer.Option("auto", "--quality", "-q", help="Quality preset (auto, low_vram, draft, standard, high)"),
     skip_existing: bool = typer.Option(True, "--skip-existing/--regenerate", help="Skip existing artifacts"),
     preview_only: bool = typer.Option(False, "--preview", "-p", help="Stop after frames and generate preview storyboard"),
 ):
@@ -1273,10 +1273,20 @@ def generate(
         console.print(f"[yellow]Using existing clips[/yellow] ({len(existing_clips)} clips)")
     else:
         try:
-            quality_map = {"draft": VideoQuality.DRAFT, "standard": VideoQuality.STANDARD, "high": VideoQuality.HIGH}
-            video_quality = quality_map.get(quality.lower(), VideoQuality.STANDARD)
-            config = VideoConfig.for_quality(video_quality)
-            video_gen = VideoGenerator(config=config)
+            # "auto" lets VideoGenerator choose based on hardware
+            if quality.lower() == "auto":
+                video_gen = VideoGenerator()  # Auto-selects model and quality
+                console.print(f"[cyan]Auto-selected:[/cyan] {video_gen.config.quality.value} ({video_gen.config.width}x{video_gen.config.height})")
+            else:
+                quality_map = {
+                    "low_vram": VideoQuality.LOW_VRAM,
+                    "draft": VideoQuality.DRAFT,
+                    "standard": VideoQuality.STANDARD,
+                    "high": VideoQuality.HIGH,
+                }
+                video_quality = quality_map.get(quality.lower(), VideoQuality.STANDARD)
+                config = VideoConfig.for_quality(video_quality)
+                video_gen = VideoGenerator(config=config)
 
             # Load reference frames
             reference_frames = {}

@@ -431,8 +431,9 @@ class VideoGenerator:
         raw_frames = int(duration_seconds * self.config.frame_rate)
         # Round to nearest valid value (8n+1)
         num_frames = ((raw_frames - 1) // 8) * 8 + 1
-        # Minimum 9 frames, maximum 481 frames (~20 seconds)
-        num_frames = max(9, min(num_frames, 481))
+        # Minimum 9 frames, maximum based on quality preset
+        max_frames = self.config.num_frames  # Respect quality preset limit
+        num_frames = max(9, min(num_frames, max_frames))
         return num_frames
 
 
