@@ -235,7 +235,9 @@ song-to-video/
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file.
+**Source Available License** - This software may be used without modification and with proper attribution. See [LICENSE](LICENSE) for full terms.
+
+**Attribution:** "Song-to-Video by Ian Bergman" with link to https://github.com/ianbnet/song-to-video
 
 ## Acknowledgments
 

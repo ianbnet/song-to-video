@@ -1,21 +1,71 @@
-MIT License
+Song-to-Video Source Available License
 
-Copyright (c) 2025 Ian Bergman
+Copyright (c) 2025 Ian Bergman. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. DEFINITIONS
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   "Software" means the song-to-video source code, documentation, and
+   associated files in this repository.
+
+   "Use" means running, executing, or operating the Software for its
+   intended purpose of generating music videos from audio files.
+
+   "Modify" means to alter, transform, adapt, translate, or create
+   derivative works based on the Software.
+
+   "Distribute" means to share, publish, sublicense, sell, or otherwise
+   make available copies of the Software to third parties.
+
+2. GRANT OF LICENSE
+
+   Subject to the terms of this License, you are granted a non-exclusive,
+   worldwide, royalty-free license to:
+
+   a) Use the Software for personal or commercial purposes.
+   b) Make copies of the Software for backup or archival purposes.
+   c) Share unmodified copies of the Software, provided this License
+      and all copyright notices are included.
+
+3. ATTRIBUTION REQUIREMENT
+
+   Any use of the Software or its outputs must include clear attribution
+   to the original author. Attribution must include:
+
+   a) The name "Song-to-Video by Ian Bergman"
+   b) A link to the repository: https://github.com/ianbnet/song-to-video
+
+   For videos generated using this Software, attribution may be included
+   in video credits, description, or accompanying documentation.
+
+4. RESTRICTIONS
+
+   You may NOT:
+
+   a) Modify, alter, or create derivative works of the Software.
+   b) Remove or alter any copyright notices or this License.
+   c) Use the Software to train machine learning models.
+   d) Claim authorship of the Software or misrepresent its origin.
+   e) Use the Software in any way that violates applicable laws.
+
+5. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+6. TERMINATION
+
+   This License automatically terminates if you violate any of its terms.
+   Upon termination, you must cease all use and destroy all copies of
+   the Software in your possession.
+
+7. GOVERNING LAW
+
+   This License shall be governed by the laws of the United States,
+   without regard to conflict of law principles.
