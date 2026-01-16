@@ -18,6 +18,7 @@ class VideoModel(Enum):
 class VideoQuality(Enum):
     """Video quality presets."""
 
+    LOW_VRAM = "low_vram"  # 270p, minimal frames, for 8GB GPUs
     DRAFT = "draft"  # 480p, fewer steps, fast
     STANDARD = "standard"  # 720p, balanced
     HIGH = "high"  # 1080p, more steps
@@ -33,16 +34,19 @@ class VideoWorkflow(Enum):
 # VRAM requirements by model (in GB)
 VRAM_REQUIREMENTS = {
     VideoModel.LTX_VIDEO: {
+        VideoQuality.LOW_VRAM: 6.0,  # With sequential CPU offload
         VideoQuality.DRAFT: 10.0,
         VideoQuality.STANDARD: 14.0,
         VideoQuality.HIGH: 20.0,
     },
     VideoModel.WAN_I2V: {
+        VideoQuality.LOW_VRAM: 6.0,
         VideoQuality.DRAFT: 8.0,
         VideoQuality.STANDARD: 12.0,
         VideoQuality.HIGH: 16.0,
     },
     VideoModel.WAN_T2V: {
+        VideoQuality.LOW_VRAM: 6.0,
         VideoQuality.DRAFT: 8.0,
         VideoQuality.STANDARD: 12.0,
         VideoQuality.HIGH: 16.0,
@@ -58,6 +62,13 @@ MODEL_IDS = {
 
 # Quality presets
 QUALITY_PRESETS = {
+    VideoQuality.LOW_VRAM: {
+        "width": 512,
+        "height": 288,  # 288p, 16:9 aspect ratio
+        "num_frames": 9,  # Minimum valid for LTX (8n+1), ~0.4 sec at 24fps
+        "num_inference_steps": 15,
+        "frame_rate": 24.0,
+    },
     VideoQuality.DRAFT: {
         "width": 640,
         "height": 480,
@@ -104,13 +115,14 @@ class VideoConfig:
 
     # Hardware settings
     use_cpu_offload: bool = True
+    use_sequential_offload: bool = False  # More aggressive, slower but uses less VRAM
     use_fp16: bool = True
 
     @classmethod
     def for_quality(cls, quality: VideoQuality) -> "VideoConfig":
         """Create config for a quality preset."""
         preset = QUALITY_PRESETS[quality]
-        return cls(
+        config = cls(
             quality=quality,
             width=preset["width"],
             height=preset["height"],
@@ -118,6 +130,10 @@ class VideoConfig:
             num_inference_steps=preset["num_inference_steps"],
             frame_rate=preset["frame_rate"],
         )
+        # Enable sequential offload for LOW_VRAM quality
+        if quality == VideoQuality.LOW_VRAM:
+            config.use_sequential_offload = True
+        return config
 
     @classmethod
     def for_duration(
@@ -169,6 +185,7 @@ class VideoConfig:
             "num_inference_steps": self.num_inference_steps,
             "guidance_scale": self.guidance_scale,
             "duration_seconds": self.duration_seconds,
+            "use_sequential_offload": self.use_sequential_offload,
         }
 
 

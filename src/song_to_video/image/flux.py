@@ -113,15 +113,20 @@ class FluxGenerator:
         config = ImageConfig.for_quality(ImageQuality.STANDARD, model)
 
         if tier == HardwareTier.LOW:
+            # Aggressive optimizations for 8GB VRAM
             config.enable_cpu_offload = True
             config.enable_attention_slicing = True
             config.enable_vae_slicing = True
+            config.enable_vae_tiling = True  # Additional VRAM savings
             config.width = 768
             config.height = 432
         elif tier == HardwareTier.MID:
             config.enable_vae_slicing = True
         elif tier == HardwareTier.CPU_ONLY:
             config.enable_cpu_offload = True
+            config.enable_attention_slicing = True
+            config.enable_vae_slicing = True
+            config.enable_vae_tiling = True
             config.use_fp16 = False
             config.width = 512
             config.height = 288

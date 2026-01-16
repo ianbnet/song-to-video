@@ -40,9 +40,10 @@ class VideoGenerator:
     Video generator supporting multiple backends.
 
     Automatically selects appropriate model based on hardware tier:
-    - HIGH (24GB+): LTX-Video at high quality
-    - MID (12-16GB): LTX-Video at standard quality with offloading
-    - LOW (8GB): Wan at draft quality with aggressive offloading
+    - HIGH (24GB+): LTX-Video at high quality (1080p, 4sec clips)
+    - MID (12-16GB): LTX-Video at standard quality (720p, 2sec clips)
+    - LOW (8GB): LTX-Video at low_vram quality (288p, 0.4sec clips, sequential offload)
+    - CPU: Wan T2V at low_vram quality
     """
 
     def __init__(
@@ -58,29 +59,36 @@ class VideoGenerator:
             config: Video configuration (auto-created if None)
         """
         self.hardware_tier = get_hardware_tier(detect_gpu())
-        self.config = config or VideoConfig()
 
         # Auto-select model based on hardware if not specified
         if model is None:
             model = self._select_model_for_hardware()
         self.model = model
+
+        # Auto-create config with appropriate quality for hardware
+        if config is None:
+            quality = self._select_quality_for_hardware()
+            self.config = VideoConfig.for_quality(quality)
+        else:
+            self.config = config
         self.config.model = model
 
         self._pipeline = None
         logger.info(
             f"VideoGenerator initialized: model={model.value}, "
+            f"quality={self.config.quality.value}, "
             f"hardware_tier={self.hardware_tier.name}"
         )
 
     def _select_model_for_hardware(self) -> VideoModel:
         """Select appropriate model for detected hardware."""
-        if self.hardware_tier == HardwareTier.HIGH:
-            return VideoModel.LTX_VIDEO
-        elif self.hardware_tier == HardwareTier.MID:
+        # Use LTX-Video for all GPU tiers - it handles offloading well
+        # LOW tier uses aggressive settings (LOW_VRAM quality + sequential offload)
+        if self.hardware_tier in (HardwareTier.HIGH, HardwareTier.MID, HardwareTier.LOW):
             return VideoModel.LTX_VIDEO
         else:
-            # LOW tier - use Wan which has lower VRAM requirements
-            return VideoModel.WAN_I2V
+            # CPU-only: use smaller Wan T2V model
+            return VideoModel.WAN_T2V
 
     def _select_quality_for_hardware(self) -> VideoQuality:
         """Select appropriate quality for detected hardware."""
@@ -88,8 +96,10 @@ class VideoGenerator:
             return VideoQuality.HIGH
         elif self.hardware_tier == HardwareTier.MID:
             return VideoQuality.STANDARD
+        elif self.hardware_tier == HardwareTier.LOW:
+            return VideoQuality.LOW_VRAM  # Aggressive settings for 8GB VRAM
         else:
-            return VideoQuality.DRAFT
+            return VideoQuality.LOW_VRAM  # CPU-only also uses minimal settings
 
     def _load_pipeline(self):
         """Load the video generation pipeline."""
@@ -131,7 +141,12 @@ class VideoGenerator:
             raise VideoGenerationError(f"Unsupported model: {self.model}")
 
         # Enable memory optimizations
-        if self.config.use_cpu_offload:
+        if self.config.use_sequential_offload:
+            # Most aggressive - moves each layer individually (slower but lowest VRAM)
+            self._pipeline.enable_sequential_cpu_offload()
+            logger.info("Enabled sequential CPU offloading for video model (low VRAM mode)")
+        elif self.config.use_cpu_offload:
+            # Standard offload - moves whole model components
             self._pipeline.enable_model_cpu_offload()
             logger.info("Enabled CPU offloading for video model")
 
