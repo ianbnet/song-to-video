@@ -28,7 +28,7 @@ class ImageQuality(Enum):
 class ImageConfig:
     """Configuration for image generation."""
 
-    model: ImageModel = ImageModel.FLUX_SCHNELL
+    model: ImageModel = ImageModel.SDXL
     width: int = 1024
     height: int = 576  # 16:9 aspect ratio for video
     num_inference_steps: int = 28
@@ -43,7 +43,7 @@ class ImageConfig:
     use_fp16: bool = True
 
     @classmethod
-    def for_quality(cls, quality: ImageQuality, model: ImageModel = ImageModel.FLUX_SCHNELL) -> "ImageConfig":
+    def for_quality(cls, quality: ImageQuality, model: ImageModel = ImageModel.SDXL) -> "ImageConfig":
         """Create config for a specific quality level."""
         if quality == ImageQuality.DRAFT:
             return cls(

@@ -88,19 +88,11 @@ class FluxGenerator:
     def _select_model_for_hardware(self) -> ImageModel:
         """Select best model for current hardware."""
         tier = get_hardware_tier()
-        hf_auth = _is_huggingface_authenticated()
 
-        # If authenticated with HuggingFace, use FLUX (higher quality)
-        # Otherwise fall back to SDXL (no auth required)
+        # Use SDXL as default - FLUX disabled due to performance issues
         if tier == HardwareTier.HIGH:
-            if hf_auth:
-                logger.info("HuggingFace authenticated - using FLUX.1-schnell")
-                return ImageModel.FLUX_SCHNELL
             return ImageModel.SDXL
         elif tier == HardwareTier.MID:
-            if hf_auth:
-                logger.info("HuggingFace authenticated - using FLUX.1-schnell")
-                return ImageModel.FLUX_SCHNELL
             return ImageModel.SDXL
         elif tier == HardwareTier.LOW:
             return ImageModel.SDXL
